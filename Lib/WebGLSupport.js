@@ -68,9 +68,15 @@ class DrawingSurface{
         this.gl.deleteProgram(program);
     }
 
-    drawObject(bufferInfo, vertexArray, uniforms) {
-        this.gl.bindVertexArray(vertexArray);
-
+    /*
+    * @param {string} name - name of the uniform variable in the shader program
+    * @returns {WebGLUniformLocation} - location of the uniform variable
+    */
+    getUniformLocation(name) {
+        return this.gl.getUniformLocation(this.program, name);
+    }
+    getAttributeLocation(name) {
+        return this.gl.getAttribLocation(this.program, name);
     }
 
     clearSurface(r, g, b, a) {
@@ -80,7 +86,7 @@ class DrawingSurface{
 
     updateCanvasSize() {
         //resize the canvas to match the size it's displayed.
-        webgl-utils.resizeCanvasToDisplaySize(this.gl.canvas);
+        webglUtils.resizeCanvasToDisplaySize(this.gl.canvas);
 
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     }
