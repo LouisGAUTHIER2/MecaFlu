@@ -76,10 +76,20 @@ class DrawingSurface{
     * @returns {WebGLUniformLocation} - location of the uniform variable
     */
     getUniformLocation(name) {
-        return this.gl.getUniformLocation(this.program, name);
+        var location = this.gl.getUniformLocation(this.program, name);
+
+        if (location == -1) {
+            throw new Error("Invalid name");
+        }
+        return location;
     }
     getAttributeLocation(name) {
-        return this.gl.getAttribLocation(this.program, name);
+        var location = this.gl.getAttribLocation(this.program, name);
+
+        if (location == -1) {
+            throw new Error("Invalid name");
+        }
+        return location;
     }
 
     clearSurface(r, g, b, a) {

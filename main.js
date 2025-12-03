@@ -1,5 +1,5 @@
 var canvasSurface = document.getElementById("canvas");
-console.log(canvasSurface);
+
 // Vertex shader source code
 const vertexShaderSource = `#version 300 es
 
@@ -12,8 +12,7 @@ out vec4 v_color;
 
 // all shaders have a main function
 void main() {
-  vec4 pos = u_matrix * a_position;
-  gl_Position = vec4(pos.xy/(1.0+pos.z),pos.zw);
+  gl_Position = u_matrix * a_position;
 
   v_color = a_color;
 }
@@ -149,18 +148,25 @@ const colors = new Uint8Array([
 ])
 */
 
-var cube = new mesh(positions, colors, drawSurf);
+var cubeA = new mesh(positions, colors, new vec3(2,0,-2), new vec3(0,0,0), drawSurf);
+var cubeB = new mesh(positions, colors, new vec3(-2,0,2), new vec3(0,0,0), drawSurf);
+var cubeC = new mesh(positions, colors, new vec3(0,0,30), new vec3(0,0,0), drawSurf);
+var c = new camera(new vec3(0,0,18), new vec3(0,0,0), 30, drawSurf)
 
-
+var k = 0;
 function mainLoop() {
     //ds.updateCanvasSize();
     drawSurf.clearSurface([0.0, 0.0, 0.0, 1.0]);
-
-    cube.draw();
-
+    c.rotation.y = k
+    
+    cubeA.draw(c.getViewMatrix());
+    cubeB.draw(c.getViewMatrix());
+    cubeC.draw(c.getViewMatrix());
+    
     requestAnimationFrame(() => {
         mainLoop();
     });
+    k += 0.01;
 }
 
 mainLoop();

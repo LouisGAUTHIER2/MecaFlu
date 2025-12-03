@@ -1,28 +1,28 @@
 class mesh {
-    constructor(vertices, colors, drawSurf) {
+    constructor(vertices, colors, position, rotation, drawSurf) {
         this.vertices = vertices;
         this.colors = colors;
         this.drawSurf = drawSurf;
 
         // transformation properties
-        this.rotation = [0,1,1];
-        this.position = [0,0,1];
+        this.rotation = rotation;
+        this.position = position;
         this.scale = [1,1,1];
 
         // initialization of buffers
-        this.positionAttributeLocation= drawSurf.getAttributeLocation("a_position");
+        this.verticesAttributeLocation= drawSurf.getAttributeLocation("a_position");
         this.colorAttributeLocation = drawSurf.getAttributeLocation("a_color");
 
-        this.positionBuffer = drawSurf.gl.createBuffer();
+        this.verticesBuffer = drawSurf.gl.createBuffer();
         this.colorBuffer = drawSurf.gl.createBuffer();
 
         this.vao = drawSurf.gl.createVertexArray();
         drawSurf.gl.bindVertexArray(this.vao);
 
-        drawSurf.gl.bindBuffer(drawSurf.gl.ARRAY_BUFFER, this.positionBuffer);
+        drawSurf.gl.bindBuffer(drawSurf.gl.ARRAY_BUFFER, this.verticesBuffer);
         drawSurf.gl.bufferData(drawSurf.gl.ARRAY_BUFFER, this.vertices, drawSurf.gl.STATIC_DRAW);
-        drawSurf.gl.enableVertexAttribArray(this.positionAttributeLocation);
-        drawSurf.gl.vertexAttribPointer(this.positionAttributeLocation, 3, drawSurf.gl.FLOAT, false, 0, 0);
+        drawSurf.gl.enableVertexAttribArray(this.verticesAttributeLocation);
+        drawSurf.gl.vertexAttribPointer(this.verticesAttributeLocation, 3, drawSurf.gl.FLOAT, false, 0, 0);
 
         drawSurf.gl.bindBuffer(drawSurf.gl.ARRAY_BUFFER, this.colorBuffer);
         drawSurf.gl.bufferData(drawSurf.gl.ARRAY_BUFFER, this.colors, drawSurf.gl.STATIC_DRAW);
@@ -30,20 +30,14 @@ class mesh {
         drawSurf.gl.vertexAttribPointer(this.colorAttributeLocation, 3, drawSurf.gl.UNSIGNED_BYTE, true, 0, 0);
     }
 
-    draw() {
+    draw(viewProjectionMatrix) {
         this.drawSurf.gl.useProgram(this.drawSurf.program);
         this.drawSurf.gl.bindVertexArray(this.vao);
 
-        var matrix = [
-            1,0,0,0,
-            0,1,0,0,
-            0,0,1,0.4,
-            0,0,0,1
-        ];
-        matrix = m4.translate(matrix, this.position[0], this.position[1], this.position[2]);
-        matrix = m4.xRotate(matrix, this.rotation[0]);
-        matrix = m4.yRotate(matrix, this.rotation[1]);
-        matrix = m4.zRotate(matrix, this.rotation[2]);
+        var matrix = m4.translate(viewProjectionMatrix, this.position.x, this.position.y, this.position.z);
+        matrix = m4.xRotate(matrix, this.rotation.x);
+        matrix = m4.yRotate(matrix, this.rotation.y);
+        matrix = m4.zRotate(matrix, this.rotation.z);
         matrix = m4.scale(matrix, this.scale[0], this.scale[1], this.scale[2]);
 
         var matrixLocation = this.drawSurf.getUniformLocation("u_matrix");
@@ -51,7 +45,7 @@ class mesh {
 
         var primitiveType = this.drawSurf.gl.TRIANGLES;
         var offset = 0;
-        var count = 36;
+        var count = this.vertices.length/3;
         this.drawSurf.gl.drawArrays(primitiveType, offset, count);
     }
 }
