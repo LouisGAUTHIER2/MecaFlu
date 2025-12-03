@@ -60,6 +60,9 @@ class DrawingSurface{
         this.gl.linkProgram(program);
 
         if (this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+            //this.gl.enable(this.gl.CULL_FACE);
+            this.gl.enable(this.gl.DEPTH_TEST);
+
             return program;
         }
 

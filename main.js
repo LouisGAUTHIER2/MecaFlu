@@ -2,58 +2,165 @@ var canvasSurface = document.getElementById("canvas");
 console.log(canvasSurface);
 // Vertex shader source code
 const vertexShaderSource = `#version 300 es
-in vec4 a_position;
 
+in vec4 a_position;
+in vec4 a_color;
+
+uniform mat4 u_matrix;
+
+out vec4 v_color;
+
+// all shaders have a main function
 void main() {
-    gl_Position = a_position;
-}`;
+  vec4 pos = u_matrix * a_position;
+  gl_Position = vec4(pos.xy/(1.0+pos.z),pos.zw);
+
+  v_color = a_color;
+}
+`;
 
 // Fragment shader source code
 const fragmentShaderSource = `#version 300 es
+
 precision highp float;
+
+in vec4 v_color;
+
 out vec4 outColor;
 
-uniform vec4 u_color;
-
 void main() {
-    outColor = u_color;
-}`;
+  outColor = v_color;
+}
+`;
 
 // Initialize WebGL2 support
-const ds = new DrawingSurface(canvasSurface, vertexShaderSource, fragmentShaderSource);
+const drawSurf = new DrawingSurface(canvasSurface, vertexShaderSource, fragmentShaderSource);
 
-// draw basic rectangle
+// draw basic cube
+
 const positions = new Float32Array([
-    0.5, 0.5,
-    0.5, -0.5,
-    -0.5, -0.5,
-    -0.5, -0.5,
-    -0.5, 0.5,
-    0.5, 0.5
+    // devant
+    0.5,-0.5, 0.5,
+    0.5, 0.5, 0.5,
+    -0.5, 0.5, 0.5,
+    
+    -0.5, 0.5, 0.5,
+    -0.5,-0.5, 0.5,
+    0.5,-0.5, 0.5,
+    // arriere
+    0.5,-0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    0.5, 0.5, -0.5,
+    0.5,-0.5, -0.5,
+    -0.5,-0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    // haut
+    0.5, 0.5, 0.5,
+    0.5, 0.5, -0.5,
+    -0.5, 0.5, 0.5,
+    -0.5, 0.5, 0.5,
+    0.5, 0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    // bas
+    -0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    0.5, -0.5, 0.5,
+    -0.5, -0.5, -0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    // droite
+    0.5, 0.5, 0.5,
+    0.5, -0.5, 0.5,
+    0.5, 0.5, -0.5,
+    0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    0.5, 0.5, -0.5,
+    // gauche
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, 0.5, 0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    -0.5, -0.5, 0.5,
 ])
 
-var positionAttributeLocation = ds.getUniformLocation("a_position");
-var positionBuffer = ds.gl.createBuffer();
-ds.gl.bindBuffer(ds.gl.ARRAY_BUFFER, positionBuffer);
-ds.gl.bufferData(ds.gl.ARRAY_BUFFER, positions, ds.gl.STATIC_DRAW);
+const colors = new Uint8Array([
+    // devant
+    255,0,0,
+    255,0,0,
+    255,0,0,
+    255,0,0,
+    255,0,0,
+    255,0,0,
+    // arriere
+    0,255,255,
+    0,255,255,
+    0,255,255,
+    0,255,255,
+    0,255,255,
+    0,255,255,
+    //haut
+    0,255,0,
+    0,255,0,
+    0,255,0,
+    0,255,0,
+    0,255,0,
+    0,255,0,
+    // bas
+    255,0,255,
+    255,0,255,
+    255,0,255,
+    255,0,255,
+    255,0,255,
+    255,0,255,
+    // droite
+    0,0,255,
+    0,0,255,
+    0,0,255,
+    0,0,255,
+    0,0,255,
+    0,0,255,
+    // gauche
+    255,255,0,
+    255,255,0,
+    255,255,0,
+    255,255,0,
+    255,255,0,
+    255,255,0,
+]);
 
-var vao = ds.gl.createVertexArray();
-ds.gl.bindVertexArray(vao);
-ds.gl.enableVertexAttribArray(positionAttributeLocation);
+/*
+const positions = new Float32Array([
+    0.5, 0.5, 0.0,
+    -0.5, 0.5, 0.0,
+    -0.5,-0.5, 0.0,
+    0.5, 0.5, 0.0,
+    -0.5,-0.5, 0.0,
+    0.5,-0.5, 0.0,
+]);
 
-var size = 2;
-var type = ds.gl.FLOAT;
-var normalize = false;
-var stride = 0;
-var offset = 0;
-ds.gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset);
+const colors = new Uint8Array([
+    255,   0,   0,
+    255,   0,   0,
+    255,   0,   0,
+      0,   0, 255,
+      0,   0, 255,
+      0,   0, 255,
+])
+*/
 
-ds.clearSurface([0.0, 0.0, 0.0, 1.0]);
+var cube = new mesh(positions, colors, drawSurf);
 
-var colorUniformLocation = ds.getUniformLocation("u_color");
-ds.gl.uniform4f(colorUniformLocation, 0.0, 1.0, 0.0, 1.0);
 
-var primitiveType = ds.gl.TRIANGLES;
-var offset = 0;
-var count = 6;
-ds.gl.drawArrays(primitiveType, offset, count);
+function mainLoop() {
+    //ds.updateCanvasSize();
+    drawSurf.clearSurface([0.0, 0.0, 0.0, 1.0]);
+
+    cube.draw();
+
+    requestAnimationFrame(() => {
+        mainLoop();
+    });
+}
+
+mainLoop();
