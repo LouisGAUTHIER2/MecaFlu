@@ -35,138 +35,46 @@ void main() {
 // Initialize WebGL2 support
 const drawSurf = new DrawingSurface(canvasSurface, vertexShaderSource, fragmentShaderSource);
 
-// draw basic cube
+// generate plane
+var vertices_position = []
+var vertices_color = []
+const planeSize = 10;
 
-const positions = new Float32Array([
-    // devant
-    0.5,-0.5, 0.5,
-    0.5, 0.5, 0.5,
-    -0.5, 0.5, 0.5,
-    
-    -0.5, 0.5, 0.5,
-    -0.5,-0.5, 0.5,
-    0.5,-0.5, 0.5,
-    // arriere
-    0.5,-0.5, -0.5,
-    -0.5, 0.5, -0.5,
-    0.5, 0.5, -0.5,
-    0.5,-0.5, -0.5,
-    -0.5,-0.5, -0.5,
-    -0.5, 0.5, -0.5,
-    // haut
-    0.5, 0.5, 0.5,
-    0.5, 0.5, -0.5,
-    -0.5, 0.5, 0.5,
-    -0.5, 0.5, 0.5,
-    0.5, 0.5, -0.5,
-    -0.5, 0.5, -0.5,
-    // bas
-    -0.5, -0.5, 0.5,
-    0.5, -0.5, -0.5,
-    0.5, -0.5, 0.5,
-    -0.5, -0.5, -0.5,
-    0.5, -0.5, -0.5,
-    -0.5, -0.5, 0.5,
-    // droite
-    0.5, 0.5, 0.5,
-    0.5, -0.5, 0.5,
-    0.5, 0.5, -0.5,
-    0.5, -0.5, 0.5,
-    0.5, -0.5, -0.5,
-    0.5, 0.5, -0.5,
-    // gauche
-    -0.5, 0.5, -0.5,
-    -0.5, -0.5, 0.5,
-    -0.5, 0.5, 0.5,
-    -0.5, 0.5, -0.5,
-    -0.5, -0.5, -0.5,
-    -0.5, -0.5, 0.5,
-])
+for (let x = 0; x < planeSize; x++) {
+    for (let z = 0; z < planeSize; z++) {
+        vertices_position.push(x+1, 0, z+1);
+        vertices_position.push(x, 0, z+1);
+        vertices_position.push(x, 0, z);
 
-const colors = new Uint8Array([
-    // devant
-    255,0,0,
-    255,0,0,
-    255,0,0,
-    255,0,0,
-    255,0,0,
-    255,0,0,
-    // arriere
-    0,255,255,
-    0,255,255,
-    0,255,255,
-    0,255,255,
-    0,255,255,
-    0,255,255,
-    //haut
-    0,255,0,
-    0,255,0,
-    0,255,0,
-    0,255,0,
-    0,255,0,
-    0,255,0,
-    // bas
-    255,0,255,
-    255,0,255,
-    255,0,255,
-    255,0,255,
-    255,0,255,
-    255,0,255,
-    // droite
-    0,0,255,
-    0,0,255,
-    0,0,255,
-    0,0,255,
-    0,0,255,
-    0,0,255,
-    // gauche
-    255,255,0,
-    255,255,0,
-    255,255,0,
-    255,255,0,
-    255,255,0,
-    255,255,0,
-]);
+        vertices_position.push(x, 0, z);
+        vertices_position.push(x+1, 0, z+1);
+        vertices_position.push(x+1, 0, z);
 
-/*
-const positions = new Float32Array([
-    0.5, 0.5, 0.0,
-    -0.5, 0.5, 0.0,
-    -0.5,-0.5, 0.0,
-    0.5, 0.5, 0.0,
-    -0.5,-0.5, 0.0,
-    0.5,-0.5, 0.0,
-]);
+        vertices_color.push(0,0,255);
+        vertices_color.push(0,0,255);
+        vertices_color.push(0,0,255);
 
-const colors = new Uint8Array([
-    255,   0,   0,
-    255,   0,   0,
-    255,   0,   0,
-      0,   0, 255,
-      0,   0, 255,
-      0,   0, 255,
-])
-*/
+        vertices_color.push(0,0,255);
+        vertices_color.push(0,0,255);
+        vertices_color.push(0,0,255);
+    }
+}
 
-var cubeA = new mesh(positions, colors, new vec3(2,0,-2), new vec3(0,0,0), drawSurf);
-var cubeB = new mesh(positions, colors, new vec3(-2,0,2), new vec3(0,0,0), drawSurf);
-var cubeC = new mesh(positions, colors, new vec3(0,0,30), new vec3(0,0,0), drawSurf);
-var c = new camera(new vec3(0,0,18), new vec3(0,0,0), 30, drawSurf)
+vertices_position = new Float32Array(vertices_position);
+vertices_color = new Uint8Array(vertices_color);
 
 var k = 0;
+var plane = new mesh(vertices_position, vertices_color, new vec3(-5,0,-5), new vec3(0,0,0), drawSurf);
+var c = new camera(new vec3(0,1,-1), new vec3(-0.1,0.9,0), 30, drawSurf)
+
 function mainLoop() {
     //ds.updateCanvasSize();
-    drawSurf.clearSurface([0.0, 0.0, 0.0, 1.0]);
-    c.rotation.y = k
+    drawSurf.clearSurface([0.0, 0.0, 0.0, 0.0]);
     
-    cubeA.draw(c.getViewMatrix());
-    cubeB.draw(c.getViewMatrix());
-    cubeC.draw(c.getViewMatrix());
-    
+    plane.draw(c.getViewMatrix());
     requestAnimationFrame(() => {
         mainLoop();
     });
-    k += 0.01;
 }
 
 mainLoop();
